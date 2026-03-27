@@ -23,7 +23,7 @@ Analyze, test, and explore network data directly from your browser — fast, cle
 ⚡ Smooth animations
 🔔 Beautiful alerts using SweetAlert2
 🌍 Live Demo & Links
-<p align="center"> <a href="https://your-website.com" target="_blank"> <img src="https://img.shields.io/badge/Live%20Demo-007bff?style=for-the-badge&logo=firefox&logoColor=white" alt="Live Demo"/> </a> <a href="https://github.com/TaoLaMinhehe/NetworkTools" target="_blank"> <img src="https://img.shields.io/badge/View%20Code-28a745?style=for-the-badge&logo=github&logoColor=white" alt="View Code"/> </a> <a href="mailto:baminhnguyendeptrai@gmail.com"> <img src="https://img.shields.io/badge/Contact-ff69b4?style=for-the-badge&logo=gmail&logoColor=white" alt="Contact"/> </a> </p>
+<p align="center"> <a href="https://taolaminhehe.github.io/NetworkTools/" target="_blank"> <img src="https://img.shields.io/badge/Live%20Demo-007bff?style=for-the-badge&logo=firefox&logoColor=white" alt="Live Demo"/> </a> <a href="https://github.com/TaoLaMinhehe/NetworkTools" target="_blank"> <img src="https://img.shields.io/badge/View%20Code-28a745?style=for-the-badge&logo=github&logoColor=white" alt="View Code"/> </a> <a href="mailto:baminhnguyendeptrai@gmail.com"> <img src="https://img.shields.io/badge/Contact-ff69b4?style=for-the-badge&logo=gmail&logoColor=white" alt="Contact"/> </a> </p>
 ⚠️ Notes
 Some tools (Port Scan, Traceroute) depend on public APIs → may be rate-limited
 Browser Ping is HTTP-based, not real ICMP
