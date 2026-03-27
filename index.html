@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Network Tools</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root{
+      --bg-color:#f0f2f5;--text-color:#333;--container-bg:#ffffff;
+      --primary-color:#007bff;--primary-hover:#0056b3;--shadow-color:rgba(0,0,0,0.05);
+      --border-color:#e9ecef;--secondary-bg:#e9ecef;--header-bg:#ffffff;--sidebar-bg:#ffffff;--sidebar-text:#555
+    }
+    body.dark-mode{--bg-color:#1a1a1a;--text-color:#f0f0f0;--container-bg:#2c2c2c;--border-color:#444;--shadow-color:rgba(0,0,0,0.2);--secondary-bg:#3c3c3c;--header-bg:#2c2c2c;--sidebar-bg:#2c2c2c;--sidebar-text:#ccc}
+    body{font-family:'Segoe UI','Roboto',sans-serif;background:var(--bg-color);color:var(--text-color);margin:0;line-height:1.6;display:flex;transition:background-color .4s,color .4s}
+    a{text-decoration:none;color:var(--primary-color)} a:hover{color:var(--primary-hover)}
+    .dashboard-container{display:flex;width:100%;min-height:100vh}
+    .sidebar{width:250px;background:var(--sidebar-bg);padding:20px 0;border-right:1px solid var(--border-color);box-shadow:2px 0 5px var(--shadow-color);position:sticky;top:0;height:100vh;transition:all .3s ease}
+    .main-content-area{flex-grow:1;padding:20px;max-width:calc(100% - 250px);margin:0 auto}
+    .logo{text-align:center;margin-bottom:30px;padding:0 20px}
+    .logo h1{font-size:1.8em;color:var(--primary-color);margin:0;white-space:nowrap}
+    .nav-menu{list-style:none;padding:0;margin:0}
+    .nav-item{margin-bottom:5px}
+    .nav-link{display:flex;align-items:center;padding:15px 20px;color:var(--sidebar-text);transition:all .3s ease;white-space:nowrap}
+    .nav-link i{font-size:1.2em;margin-right:15px;width:20px;text-align:center}
+    .nav-link.active,.nav-link:hover{background:var(--primary-color);color:#fff;border-radius:8px;margin:0 10px}
+    .nav-title{font-size:.9em;font-weight:bold;color:#8898aa;padding:15px 20px 5px}
+    .header{background:var(--header-bg);padding:20px 30px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;border-radius:12px;margin-bottom:25px;transition:background-color .4s}
+    .header h2{font-size:1.8em;margin:0}
+    .header .subtitle{color:#8898aa;margin:0}
+    .header-actions{display:flex;gap:15px;align-items:center}
+    .header-actions button{background:none;border:none;color:var(--text-color);font-size:1.2em;cursor:pointer;padding:10px;border-radius:50%;transition:background-color .3s}
+    .header-actions button:hover{background:var(--secondary-bg)}
+    .card{background:var(--container-bg);border-radius:12px;padding:25px 30px;box-shadow:0 7px 30px -10px var(--shadow-color);border:1px solid var(--border-color);margin-bottom:25px;transition:background-color .4s,border-color .4s}
+    .tool-content{display:none;animation:fadeIn .5s ease}
+    .tool-content.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .search-box{display:flex;gap:10px;margin-bottom:25px;align-items:center;flex-wrap:wrap}
+    .search-box input,.search-box select{flex-grow:1;padding:12px 18px;border-radius:8px;border:1px solid var(--border-color);font-size:16px;background:var(--secondary-bg);color:var(--text-color);min-width:150px}
+    .search-box button{padding:12px 25px;border:none;border-radius:8px;background:var(--primary-color);color:#fff;cursor:pointer;font-size:16px;font-weight:bold;transition:background-color .3s;display:flex;align-items:center;gap:8px}
+    .search-box button:hover{background:var(--primary-hover)}
+    .search-box .loader{border:2px solid #FFF;border-bottom-color:transparent;border-radius:50%;display:inline-block;box-sizing:border-box;width:18px;height:18px;animation:rotation 1s linear infinite}
+    @keyframes rotation{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;text-align:left}
+    .info-item{font-size:16px;padding:15px;background:var(--secondary-bg);border-radius:10px;display:flex;align-items:center;gap:15px}
+    .info-item i.icon{color:var(--primary-color);font-size:1.5em;width:30px;text-align:center}
+    .info-item span{font-weight:600}
+    #map{width:100%;height:400px;border:1px solid var(--border-color);margin-top:15px;border-radius:12px}
+    .action-buttons{display:flex;justify-content:center;gap:15px;margin-top:20px;flex-wrap:wrap}
+    .action-buttons a{text-decoration:none}
+    .action-buttons button{padding:10px 20px;font-size:15px;cursor:pointer;border-radius:8px;border:1px solid var(--primary-color);background:transparent;color:var(--primary-color);font-weight:600;transition:all .3s}
+    .action-buttons button:hover{background:var(--primary-color);color:#fff}
+    .result-section{margin-top:20px;padding:15px;background:var(--secondary-bg);border-radius:8px;overflow-x:auto}
+    .result-section pre{white-space:pre-wrap;word-break:break-all;font-family:'Courier New',Courier,monospace;color:var(--text-color);font-size:14px}
+    .footer{text-align:center;margin-top:20px;color:#8898aa;font-size:14px}
+    @media (max-width:768px){
+      body{flex-direction:column}
+      .sidebar{width:100%;height:auto;position:relative;border-right:none;border-bottom:1px solid var(--border-color);box-shadow:0 2px 5px var(--shadow-color)}
+      .main-content-area{max-width:100%;margin:0;padding:15px}
+      .header{flex-direction:column;align-items:flex-start}
+      .nav-menu{display:flex;flex-wrap:wrap;justify-content:center}
+      .nav-link{padding:10px 15px;margin:5px;flex:1;justify-content:center}
+      .nav-link span{display:none}
+      .nav-link i{margin-right:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="sidebar">
+      <div class="logo"><h1>Network Tools</h1></div>
+      <ul class="nav-menu">
+        <li class="nav-title">Main Tools</li>
+        <li class="nav-item"><a href="#" class="nav-link active" data-tool="ip-lookup"><i class="fa-solid fa-globe-asia"></i> <span>IP Lookup</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="dns-lookup"><i class="fa-solid fa-server"></i> <span>DNS Lookup</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="whois-lookup"><i class="fa-solid fa-user-secret"></i> <span>Whois / RDAP</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="port-scan"><i class="fa-solid fa-network-wired"></i> <span>Port Scan</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="ping-tool"><i class="fa-solid fa-broadcast-tower"></i> <span>Ping</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="traceroute-tool"><i class="fa-solid fa-route"></i> <span>Traceroute</span></a></li>
+
+        <li class="nav-title">Other Utilities</li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="subnet-calc"><i class="fa-solid fa-calculator"></i> <span>Subnet Calculator</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="hash-gen"><i class="fa-solid fa-hashtag"></i> <span>Hash Generator</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="url-encode"><i class="fa-solid fa-link"></i> <span>URL Encode/Decode</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tool="base64-encode"><i class="fa-solid fa-code"></i> <span>Base64 Encode/Decode</span></a></li>
+      </ul>
+    </div>
+
+    <div class="main-content-area">
+      <div class="header">
+        <div>
+          <h2 id="tool-title"><i class="fa-solid fa-globe-asia"></i> IP Lookup</h2>
+          <p class="subtitle" id="tool-subtitle">Look up geographic and ISP information for an IP address (CORS-safe, multiple fallback sources).</p>
+        </div>
+        <div class="header-actions"><button id="toggleDark"><i class="fa-solid fa-moon"></i></button></div>
+      </div>
+
+      <!-- IP LOOKUP -->
+      <div class="tool-content active" id="ip-lookup">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="ipInput" placeholder="Enter IP (or leave blank to use your IP)">
+            <button id="searchBtn"><span class="btn-text">Lookup</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="results-container" style="display:none;">
+            <div class="info-grid">
+              <div class="info-item" id="ip"><i class="icon fa-solid fa-network-wired"></i><div>IP Address<br><span>...</span></div></div>
+              <div class="info-item" id="city"><i class="icon fa-solid fa-city"></i><div>City<br><span>...</span></div></div>
+              <div class="info-item" id="region"><i class="icon fa-solid fa-map"></i><div>Region<br><span>...</span></div></div>
+              <div class="info-item" id="country"><i class="icon fa-solid fa-flag"></i><div>Country<br><span>...</span></div></div>
+              <div class="info-item" id="timezone"><i class="icon fa-solid fa-clock"></i><div>Timezone<br><span>...</span></div></div>
+              <div class="info-item" id="isp"><i class="icon fa-solid fa-wifi"></i><div>ISP<br><span>...</span></div></div>
+              <div class="info-item" id="org"><i class="icon fa-solid fa-building"></i><div>Organization<br><span>...</span></div></div>
+              <div class="info-item" id="as"><i class="icon fa-solid fa-hashtag"></i><div>Autonomous System (AS)<br><span>...</span></div></div>
+            </div>
+            <div class="action-buttons">
+              <button id="copyIpBtn"><i class="fa-solid fa-copy"></i> Copy IP</button>
+            </div>
+            <h2 class="section-title" style="margin-top: 30px;"><i class="fa-solid fa-map-location-dot"></i> Location Map</h2>
+            <iframe id="map" src="" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <div class="action-buttons"><a id="mapLink" href="#" target="_blank" rel="noopener noreferrer"><button><i class="fa-solid fa-external-link-alt"></i> View Large Map</button></a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DNS LOOKUP -->
+      <div class="tool-content" id="dns-lookup">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="dnsInput" placeholder="Enter domain, e.g: google.com">
+            <button id="dnsLookupBtn"><span class="btn-text">DNS Lookup</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="dns-result" class="result-section">
+            <pre id="dns-output-content">Enter a domain and click "DNS Lookup" to see results.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHOIS / RDAP -->
+      <div class="tool-content" id="whois-lookup">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="whoisInput" placeholder="Enter domain, e.g: google.com">
+            <button id="whoisLookupBtn"><span class="btn-text">Whois / RDAP Lookup</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="whois-result" class="result-section">
+            <pre id="whois-output-content">Enter a domain and click "Whois / RDAP Lookup" to see results.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PING -->
+      <div class="tool-content" id="ping-tool">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="pingInput" placeholder="Enter IP or domain to Ping">
+            <button id="pingBtn"><span class="btn-text">Ping</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="ping-result" class="result-section">
+            <pre id="ping-output-content">Results will be displayed here.</pre>
+          </div>
+          <p style="opacity:.75;font-size:12px;margin-top:8px">Browser Ping measures HTTP(S) response time; true ICMP requires a backend.</p>
+        </div>
+      </div>
+
+      <!-- TRACEROUTE -->
+      <div class="tool-content" id="traceroute-tool">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="tracerouteInput" placeholder="Enter IP or domain to Traceroute">
+            <button id="tracerouteBtn"><span class="btn-text">Traceroute</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="traceroute-result" class="result-section">
+            <pre id="traceroute-output-content">Results will be displayed here.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORT SCAN -->
+      <div class="tool-content" id="port-scan">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="portIpInput" placeholder="Enter IP address to scan">
+            <input type="text" id="portInput" placeholder="Enter ports, e.g: 80,443,22">
+            <button id="startScanBtn"><span class="btn-text">Scan</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="port-scan-result" class="result-section">
+            <pre id="port-scan-output-content">Results will be displayed here after scanning.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBNET, HASH, URL, BASE64 (unchanged logic) -->
+      <div class="tool-content" id="subnet-calc">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="subnetIpInput" placeholder="Enter IP, e.g: 192.168.1.1">
+            <input type="text" id="subnetCidrInput" placeholder="Enter CIDR, e.g: 24">
+            <button id="subnetCalcBtn"><span class="btn-text">Calculate</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="subnet-result" class="result-section" style="display:none;">
+            <pre id="subnet-output-content"></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-content" id="hash-gen">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="hashInput" placeholder="Enter text string...">
+            <select id="hashType">
+              <option value="sha1">SHA-1</option>
+              <option value="sha256" selected>SHA-256</option>
+            </select>
+            <button id="hashBtn"><span class="btn-text">Generate Hash</span><span class="loader" style="display:none;"></span></button>
+          </div>
+          <div id="hash-result" class="result-section">
+            <pre id="hash-output-content">Results will be displayed here.</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-content" id="url-encode">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="urlInput" placeholder="Enter URL or text...">
+            <button id="urlEncodeBtn">Encode</button>
+            <button id="urlDecodeBtn">Decode</button>
+          </div>
+          <div id="url-result" class="result-section">
+            <pre id="url-output-content">Results will be displayed here.</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-content" id="base64-encode">
+        <div class="card">
+          <div class="search-box">
+            <input type="text" id="base64Input" placeholder="Enter text...">
+            <button id="base64EncodeBtn">Encode</button>
+            <button id="base64DecodeBtn">Decode</button>
+          </div>
+          <div id="base64-result" class="result-section">
+            <pre id="base64-output-content">Results will be displayed here.</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">© Copyright belongs to Nguyen Ba Minh</div>
+    </div>
+  </div>
+
+  <script>
+    // --- NAV / UI ---
+    const navLinks=[...document.querySelectorAll('.nav-link')];
+    const toolContents=[...document.querySelectorAll('.tool-content')];
+    const toolTitle=document.getElementById('tool-title');
+    const toolSubtitle=document.getElementById('tool-subtitle');
+    const toggleBtn=document.getElementById('toggleDark');
+    const toolInfoMap={
+      'ip-lookup':{title:'IP Lookup',subtitle:'Look up geographic and ISP information (multi-source, CORS-safe).',icon:'fa-globe-asia'},
+      'dns-lookup':{title:'DNS Lookup',subtitle:'Resolve via DNS-over-HTTPS (Cloudflare).',icon:'fa-server'},
+      'whois-lookup':{title:'Whois / RDAP',subtitle:'Get domain registration information via open RDAP.',icon:'fa-user-secret'},
+      'port-scan':{title:'Port Scan',subtitle:'Based on public API, rate-limited.',icon:'fa-network-wired'},
+      'ping-tool':{title:'Ping',subtitle:'Measure HTTP(S) response time — requires backend for true ICMP.',icon:'fa-broadcast-tower'},
+      'traceroute-tool':{title:'Traceroute',subtitle:'Using public API; may be rate-limited.',icon:'fa-route'},
+      'subnet-calc':{title:'Subnet Calculator',subtitle:'Calculate network parameters.',icon:'fa-calculator'},
+      'hash-gen':{title:'Hash Generator',subtitle:'Generate SHA-1 / SHA-256 in the browser.',icon:'fa-hashtag'},
+      'url-encode':{title:'URL Encode/Decode',subtitle:'Encode / Decode URLs.',icon:'fa-link'},
+      'base64-encode':{title:'Base64 Encode/Decode',subtitle:'Encode / Decode Base64.',icon:'fa-code'},
+    };
+    function showTool(id){
+      toolContents.forEach(t=>t.classList.remove('active'));
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const target=document.getElementById(id);
+      if(target){
+        target.classList.add('active');
+        document.querySelector(`[data-tool="${id}"]`).classList.add('active');
+        const info=toolInfoMap[id];
+        if(info){ toolTitle.innerHTML=`<i class="fa-solid ${info.icon}"></i> ${info.title}`; toolSubtitle.textContent=info.subtitle;}
+      }
+    }
+    navLinks.forEach(link=>link.addEventListener('click',e=>{e.preventDefault();showTool(e.currentTarget.dataset.tool);}));
+    function updateThemeIcon(isDark){const icon=toggleBtn.querySelector('i');icon.className=isDark?'fa-solid fa-sun':'fa-solid fa-moon'}
+    function toggleDarkMode(){document.body.classList.toggle('dark-mode');const isDark=document.body.classList.contains('dark-mode');localStorage.setItem('darkMode',isDark);updateThemeIcon(isDark)}
+    function initializeTheme(){const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;const saved=localStorage.getItem('darkMode');const isDark=saved==='true'||(saved===null&&prefersDark);if(isDark)document.body.classList.add('dark-mode');updateThemeIcon(isDark)}
+    toggleBtn.addEventListener('click',toggleDarkMode); initializeTheme();
+
+    function showNotification(title,text,icon){Swal.fire({title,text,icon,confirmButtonColor:'var(--primary-color)',background:'var(--container-bg)',color:'var(--text-color)'});}
+    function showLoading(isLoading,btn){const t=btn.querySelector('.btn-text');const l=btn.querySelector('.loader');btn.disabled=isLoading;t.style.display=isLoading?'none':'inline';l.style.display=isLoading?'inline-block':'none'}
+    function updateInfoItem(id,val){const el=document.getElementById(id);if(!el)return;const span=el.querySelector('span');span.textContent=(val??'N/A')||'N/A'}
+
+    // --- IP LOOKUP (ipify + ipwho.is + ipapi.co fallback) ---
+    const ipInput=document.getElementById('ipInput');
+    const searchBtn=document.getElementById('searchBtn');
+    const resultsContainer=document.getElementById('results-container');
+    const copyIpBtn=document.getElementById('copyIpBtn');
+    const map=document.getElementById('map'); const mapLink=document.getElementById('mapLink');
+    let currentIpAddress='';
+
+    async function getClientIP(){
+      // ipify supports CORS and returns client public IP
+      const r=await fetch('https://api.ipify.org?format=json'); const j=await r.json(); return j.ip;
+    }
+    async function geoFrom_ipwhois(ip){
+      const r=await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`); // ipwho.is (NOT ipwhois.io)
+      const j=await r.json();
+      if(j.success!==true) throw new Error(j.message||'ipwho.is returned an error');
+      return {
+        ip:j.ip, city:j.city, region:j.region, country:j.country, country_code:j.country_code,
+        timezone:j.timezone?.id||j.timezone||'', isp:j.connection?.isp||j.org||j.isp||'',
+        org:j.connection?.organization||j.org||'', asn:j.connection?.asn||j.asn||'',
+        latitude:j.latitude, longitude:j.longitude
+      };
+    }
+    async function geoFrom_ipapico(ip){
+      const r=await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`);
+      const j=await r.json();
+      if(j.error){ throw new Error(j.reason||'ipapi.co returned an error'); }
+      return {
+        ip:j.ip, city:j.city, region:j.region, country:j.country_name, country_code:j.country,
+        timezone:j.timezone, isp:j.org||'', org:j.org||'', asn:j.asn||'', latitude:j.latitude, longitude:j.longitude
+      };
+    }
+    function displayResults(data){
+      currentIpAddress=data.ip;
+      updateInfoItem('ip',data.ip);
+      updateInfoItem('city',data.city);
+      updateInfoItem('region',data.region);
+      const countryEl=document.getElementById('country');
+      if(countryEl){
+        const flag=data.country_code?`<img src="https://flagcdn.com/w20/${String(data.country_code).toLowerCase()}.png" style="margin-right:8px;vertical-align:middle">`:'';
+        countryEl.querySelector('span').innerHTML=`${flag} ${data.country||'N/A'}`;
+      }
+      updateInfoItem('timezone',data.timezone);
+      updateInfoItem('isp',data.isp);
+      updateInfoItem('org',data.org);
+      updateInfoItem('as',data.asn);
+      const {latitude:lat, longitude:lon}=data;
+      if(lat && lon){
+        map.src=`https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.1},${lat-0.1},${lon+0.1},${lat+0.1}&layer=mapnik&marker=${lat},${lon}`;
+        mapLink.href=`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=12/${lat}/${lon}`;
+      }
+      resultsContainer.style.display='block';
+    }
+    async function fetchIPInfo(ip){
+      showLoading(true,searchBtn); resultsContainer.style.display='none';
+      try{
+        const targetIP=ip || await getClientIP();
+        let data;
+        try{ data=await geoFrom_ipwhois(targetIP); }
+        catch(e1){ data=await geoFrom_ipapico(targetIP); }
+        displayResults(data);
+      }catch(err){
+        showNotification('Error', `Cannot retrieve IP data: ${err.message}`, 'error');
+        resultsContainer.style.display='none';
+      }finally{ showLoading(false,searchBtn); }
+    }
+    function handleSearch(){ const ip=(ipInput.value||'').trim(); fetchIPInfo(ip); }
+    function copyIpAddress(){ if(!currentIpAddress){ showNotification('No IP','Please perform a lookup first.','warning'); return;} navigator.clipboard.writeText(currentIpAddress).then(()=>showNotification('Success!',`Copied IP: ${currentIpAddress}`,'success')).catch(()=>showNotification('Failed','Could not copy to clipboard.','error')); }
+    searchBtn.addEventListener('click',handleSearch); copyIpBtn.addEventListener('click',copyIpAddress);
+
+    // Fetch IP and lookup on page load (fail gracefully if error)
+    (async()=>{ try{ const ip=await getClientIP(); ipInput.value=ip; fetchIPInfo(ip); } catch(e){ console.warn('Could not fetch client IP:', e);} })();
+
+    // --- DNS LOOKUP via Cloudflare DoH (CORS-friendly) ---
+    const dnsInput=document.getElementById('dnsInput');
+    const dnsLookupBtn=document.getElementById('dnsLookupBtn');
+    const dnsOutputContent=document.getElementById('dns-output-content');
+    async function performDnsLookup(){
+      const domain=(dnsInput.value||'').trim();
+      if(!domain){ showNotification('Error','Please enter a domain.','error'); return; }
+      showLoading(true,dnsLookupBtn);
+      dnsOutputContent.textContent='Performing DNS lookup (Cloudflare DoH)...';
+      try{
+        const types=['A','AAAA','CNAME','MX','NS','TXT'];
+        const results=[];
+        for(const t of types){
+          const url=`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${t}`;
+          const r=await fetch(url,{headers:{'accept':'application/dns-json'}});
+          const j=await r.json();
+          if(Array.isArray(j.Answer)){
+            j.Answer.forEach(a=>results.push(`${t}\t${a.name}\t${a.TTL}\t${a.data}`));
+          }
+        }
+        dnsOutputContent.textContent = results.length? results.join('\n') : 'No records returned.';
+      }catch(err){
+        showNotification('Error','Could not perform DNS lookup.','error');
+        dnsOutputContent.textContent='An error occurred during DNS lookup.';
+      }finally{ showLoading(false,dnsLookupBtn); }
+    }
+    dnsLookupBtn.addEventListener('click',performDnsLookup);
+
+    // --- WHOIS / RDAP (rdap.org is CORS-friendly) ---
+    const whoisInput=document.getElementById('whoisInput');
+    const whoisLookupBtn=document.getElementById('whoisLookupBtn');
+    const whoisOutputContent=document.getElementById('whois-output-content');
+    function rdapToText(obj){
+      const lines=[];
+      if(obj.ldhName) lines.push(`Domain: ${obj.ldhName}`);
+      if(obj.handle) lines.push(`Handle: ${obj.handle}`);
+      if(obj.status) lines.push(`Status: ${Array.isArray(obj.status)?obj.status.join(', '):obj.status}`);
+      if(obj.events){
+        const created=obj.events.find(e=>e.eventAction==='registration')?.eventDate;
+        const changed=obj.events.find(e=>e.eventAction==='last changed')?.eventDate;
+        const expires=obj.events.find(e=>e.eventAction==='expiration')?.eventDate;
+        if(created) lines.push(`Created: ${created}`);
+        if(changed) lines.push(`Updated: ${changed}`);
+        if(expires) lines.push(`Expires: ${expires}`);
+      }
+      if(obj.nameServers){
+        lines.push('Name Servers:');
+        obj.nameServers.forEach(ns=>lines.push(`  - ${ns.ldhName||ns}`));
+      }
+      if(obj.entities){
+        obj.entities.forEach(en=>{
+          if(en.vcardArray && en.vcardArray[1]){
+            const v=en.vcardArray[1];
+            const fn=(v.find(x=>x[0]==='fn')||[])[3];
+            const email=(v.find(x=>x[0]==='email')||[])[3];
+            const tel=(v.find(x=>x[0]==='tel')||[])[3];
+            if(fn||email||tel){ lines.push(`Contact: ${fn||''} ${email?'- '+email:''} ${tel?'- '+tel:''}`.trim()); }
+          }
+        });
+      }
+      return lines.join('\n') || JSON.stringify(obj,null,2);
+    }
+    async function performWhoisLookup(){
+      const domain=(whoisInput.value||'').trim();
+      if(!domain){ showNotification('Error','Please enter a domain.','error'); return; }
+      showLoading(true,whoisLookupBtn);
+      whoisOutputContent.textContent='Performing RDAP lookup...';
+      try{
+        const r=await fetch(`https://rdap.org/domain/${encodeURIComponent(domain)}`);
+        if(!r.ok) throw new Error('RDAP did not return data');
+        const j=await r.json();
+        whoisOutputContent.textContent = rdapToText(j);
+      }catch(err){
+        whoisOutputContent.textContent='Could not retrieve RDAP for this domain.';
+        showNotification('Error','Could not connect to RDAP.','error');
+      }finally{ showLoading(false,whoisLookupBtn); }
+    }
+    whoisLookupBtn.addEventListener('click',performWhoisLookup);
+
+    // --- Ping (HTTP) + fall back to hackertarget (may rate-limit) ---
+    const pingInput=document.getElementById('pingInput');
+    const pingBtn=document.getElementById('pingBtn');
+    const pingOutputContent=document.getElementById('ping-output-content');
+    async function httpPing(url){
+      const start=performance.now();
+      try{
+        const controller=new AbortController();
+        const timeout=setTimeout(()=>controller.abort(),8000);
+        await fetch((/^https?:\/\//i.test(url)?url:`https://${url}`),{mode:'no-cors',cache:'no-store',signal:controller.signal});
+        clearTimeout(timeout);
+        return Math.round(performance.now()-start);
+      }catch(e){
+        return Math.round(performance.now()-start);
+      }
+    }
+    async function performPing(){
+      const target=(pingInput.value||'').trim();
+      if(!target){ showNotification('Error','Please enter an IP or domain.','error'); return; }
+      showLoading(true,pingBtn);
+      pingOutputContent.textContent='Pinging (HTTP)...';
+      try{
+        const ms = await httpPing(target);
+        pingOutputContent.textContent = `HTTP round-trip ~ ${ms} ms (not true ICMP).`;
+      }finally{ showLoading(false,pingBtn); }
+    }
+    pingBtn.addEventListener('click',performPing);
+
+    // --- Traceroute / Port scan using HackerTarget (kept, with graceful errors) ---
+    const tracerouteInput=document.getElementById('tracerouteInput');
+    const tracerouteBtn=document.getElementById('tracerouteBtn');
+    const tracerouteOutputContent=document.getElementById('traceroute-output-content');
+    async function performTraceroute(){
+      const target=(tracerouteInput.value||'').trim();
+      if(!target){ showNotification('Error','Please enter an IP or domain.','error'); return; }
+      showLoading(true,tracerouteBtn);
+      tracerouteOutputContent.textContent='Performing Traceroute (HackerTarget)...';
+      try{
+        const r=await fetch(`https://api.hackertarget.com/mtr/?q=${encodeURIComponent(target)}`);
+        const txt=await r.text();
+        tracerouteOutputContent.textContent=txt;
+      }catch(e){
+        tracerouteOutputContent.textContent='Could not perform Traceroute (may be rate-limited by provider).';
+        showNotification('Error','Could not connect to Traceroute server.','error');
+      }finally{ showLoading(false,tracerouteBtn); }
+    }
+    tracerouteBtn.addEventListener('click',performTraceroute);
+
+    const portIpInput=document.getElementById('portIpInput');
+    const portInput=document.getElementById('portInput');
+    const startScanBtn=document.getElementById('startScanBtn');
+    const portScanOutputContent=document.getElementById('port-scan-output-content');
+    async function startPortScan(){
+      const ip=(portIpInput.value||'').trim();
+      const ports=(portInput.value||'').trim();
+      if(!ip||!ports){ showNotification('Error','Please enter an IP and ports to scan.','error'); return; }
+      showLoading(true,startScanBtn);
+      portScanOutputContent.textContent=`Scanning ports ${ports} on ${ip}...\nNote: Public API may be rate-limited.`;
+      try{
+        const r=await fetch(`https://api.hackertarget.com/nmap/?q=${encodeURIComponent(ip)}`);
+        const txt=await r.text();
+        portScanOutputContent.textContent=txt;
+      }catch(e){
+        portScanOutputContent.textContent='Could not scan ports (may be rate-limited by provider).';
+        showNotification('Error','Could not connect to Port Scan server.','error');
+      }finally{ showLoading(false,startScanBtn); }
+    }
+    startScanBtn.addEventListener('click',startPortScan);
+
+    // --- Subnet calc ---
+    const subnetIpInput=document.getElementById('subnetIpInput');
+    const subnetCidrInput=document.getElementById('subnetCidrInput');
+    const subnetCalcBtn=document.getElementById('subnetCalcBtn');
+    const subnetResult=document.getElementById('subnet-result');
+    const subnetOutputContent=document.getElementById('subnet-output-content');
+    function performSubnetCalc(){
+      const ip=(subnetIpInput.value||'').trim();
+      const cidr=parseInt((subnetCidrInput.value||'').trim(),10);
+      if(!ip||isNaN(cidr)||cidr<0||cidr>32){ showNotification('Error','Please enter a valid IP address and CIDR 0-32.','error'); return; }
+      const parts=ip.split('.').map(Number);
+      if(parts.length!==4||parts.some(p=>p<0||p>255||!Number.isInteger(p))){ showNotification('Error','Invalid IP address.','error'); return; }
+      const ipBin=parts.map(p=>p.toString(2).padStart(8,'0')).join('');
+      const networkBin=ipBin.substring(0,cidr)+'0'.repeat(32-cidr);
+      const broadcastBin=ipBin.substring(0,cidr)+'1'.repeat(32-cidr);
+      const toDot=(bin)=>[0,8,16,24].map(i=>parseInt(bin.substring(i,i+8),2)).join('.');
+      const mask=[0,8,16,24].map(i=>parseInt('1'.repeat(Math.max(0,Math.min(8,cidr-i)))+'0'.repeat(Math.max(0,8-(cidr-i))),2)).join('.');
+      const hostCount=Math.pow(2,32-cidr);
+      const usable=hostCount>2?hostCount-2:0;
+      subnetResult.style.display='block';
+      subnetOutputContent.textContent=`IP Address: ${ip}/${cidr}
+Network Address: ${toDot(networkBin)}
+Broadcast Address: ${toDot(broadcastBin)}
+Subnet Mask: ${mask}
+Total Hosts: ${hostCount}
+Usable Hosts: ${usable}`;
+    }
+    subnetCalcBtn.addEventListener('click',performSubnetCalc);
+
+    // --- Hash ---
+    const hashInput=document.getElementById('hashInput');
+    const hashType=document.getElementById('hashType');
+    const hashBtn=document.getElementById('hashBtn');
+    const hashOutputContent=document.getElementById('hash-output-content');
+    async function generateHash(){
+      const text=hashInput.value; const type=hashType.value;
+      if(!text){ showNotification('Error','Please enter text.','error'); return; }
+      showLoading(true,hashBtn); hashOutputContent.textContent='Generating hash...';
+      try{
+        const algo= type==='sha1' ? 'SHA-1' : 'SHA-256';
+        const buf=await crypto.subtle.digest(algo,new TextEncoder().encode(text));
+        const arr=[...new Uint8Array(buf)]; const hex=arr.map(b=>b.toString(16).padStart(2,'0')).join('');
+        hashOutputContent.textContent=hex;
+      }catch(e){ hashOutputContent.textContent=`Error: ${e.message}`; }
+      finally{ showLoading(false,hashBtn); }
+    }
+    hashBtn.addEventListener('click',generateHash);
+
+    // --- URL ---
+    const urlInput=document.getElementById('urlInput');
+    const urlEncodeBtn=document.getElementById('urlEncodeBtn');
+    const urlDecodeBtn=document.getElementById('urlDecodeBtn');
+    const urlOutputContent=document.getElementById('url-output-content');
+    function performUrlEncode(){ urlOutputContent.textContent=encodeURIComponent(urlInput.value||''); }
+    function performUrlDecode(){ try{ urlOutputContent.textContent=decodeURIComponent(urlInput.value||''); } catch{ showNotification('Error','Invalid URL string to decode.','error'); urlOutputContent.textContent='Decode error.'; } }
+    urlEncodeBtn.addEventListener('click',performUrlEncode);
+    urlDecodeBtn.addEventListener('click',performUrlDecode);
+
+    // --- Base64 ---
+    const base64Input=document.getElementById('base64Input');
+    const base64EncodeBtn=document.getElementById('base64EncodeBtn');
+    const base64DecodeBtn=document.getElementById('base64DecodeBtn');
+    const base64OutputContent=document.getElementById('base64-output-content');
+    function performBase64Encode(){ base64OutputContent.textContent=btoa(base64Input.value||''); }
+    function performBase64Decode(){ try{ base64OutputContent.textContent=atob(base64Input.value||''); } catch{ showNotification('Error','Invalid Base64 string to decode.','error'); base64OutputContent.textContent='Decode error.'; } }
+    base64EncodeBtn.addEventListener('click',performBase64Encode);
+    base64DecodeBtn.addEventListener('click',performBase64Decode);
+  </script>
+</body>
+</html>
