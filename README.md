@@ -28,10 +28,6 @@ Analyze, test, and explore network data directly from your browser — fast, cle
 Some tools (Port Scan, Traceroute) depend on public APIs → may be rate-limited
 Browser Ping is HTTP-based, not real ICMP
 No backend required — fully client-side
-📸 Preview
-
-(Add screenshots here for better GitHub appearance)
-
 👨‍💻 Author
 
 Nguyen Ba Minh
